@@ -1,0 +1,16 @@
+# Dépendances & builds
+node_modules/
+dist-web/
+dist/
+src-tauri/target/
+
+# Données portables locales d'exécution
+data/
+bootstrap.json
+
+# OS & éditeurs
+.DS_Store
+Thumbs.db
+*.log
+.vscode/
+!.vscode/extensions.json

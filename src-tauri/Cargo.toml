@@ -1,0 +1,82 @@
+[package]
+name = "poddesktop"
+version = "1.0.0"
+description = "Client desktop natif, ultra-léger, portable et multilingue compagnon d'AntennaPod"
+authors = ["PodDesktop Contributors"]
+edition = "2021"
+rust-version = "1.77"
+
+[lib]
+name = "poddesktop_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[features]
+# Activé en production (`npm run build:win` / `tauri build`) pour embarquer `dist-web/` dans le binaire
+# au lieu de pointer vers `devUrl` (`http://localhost:1420`).
+custom-protocol = ["tauri/custom-protocol"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+# Framework applicatif natif (WebView2 sous Windows, WebKitGTK sous Linux)
+tauri = { version = "2", features = ["tray-icon", "image-png", "protocol-asset"] }
+tauri-plugin-dialog = "2"
+tauri-plugin-opener = "2"
+
+# Sérialisation
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+# Base de données SQLite embarquée (WAL + FTS5 inclus par défaut avec bundled)
+rusqlite = { version = "0.32", features = ["bundled", "modern_sqlite"] }
+
+# Réseau asynchrone léger (TLS pur Rust via rustls, zéro dépendance OpenSSL)
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "sync", "time", "fs", "io-util"] }
+reqwest = { version = "0.12", default-features = false, features = ["rustls-tls", "json", "stream", "gzip", "deflate", "cookies"] }
+futures-util = "0.3"
+url = "2"
+
+# Parsing RSS 2.0, Atom, iTunes, OPML et Podcasting 2.0
+quick-xml = "0.37"
+
+# Moteur Audio Natif pur Rust (décodage + sortie bas niveau + normalisation EBU R128)
+symphonia = { version = "0.5", features = ["mp3", "aac", "isomp4", "ogg", "vorbis", "flac", "wav", "pcm"] }
+cpal = "0.15"
+ebur128 = "0.1"
+
+# Contrôles multimédias natifs OS (SMTC sous Windows, MPRIS2 D-Bus sous Linux)
+souvlaki = "0.8"
+
+# Sécurité & Chiffrement AES-256-GCM des identifiants locaux + hashes
+aes-gcm = "0.10"
+rand = "0.8"
+base64 = "0.22"
+sha2 = "0.10"
+sha1 = "0.10"
+
+# Dates ISO-8601 / RFC 2822 & journalisation
+chrono = { version = "0.4", features = ["serde"] }
+log = "0.4"
+thiserror = "2"
+
+# Intégration native Windows (barre des tâches ITaskbarList3 + boutons miniatures)
+[target.'cfg(windows)'.dependencies]
+windows = { version = "0.58", features = [
+    "Win32_Foundation",
+    "Win32_UI_Shell",
+    "Win32_UI_WindowsAndMessaging",
+    "Win32_System_Com",
+    "Win32_Graphics_Gdi",
+] }
+
+[dev-dependencies]
+tokio = { version = "1", features = ["net"] }
+
+# Profil de compilation optimisé pour un binaire < 12 Mo et démarrage < 300 ms
+[profile.release]
+opt-level = "z"
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true

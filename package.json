@@ -1,0 +1,28 @@
+{
+  "name": "poddesktop",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Client desktop natif ultra-léger, portable et multilingue compagnon d'AntennaPod (Windows & Linux)",
+  "type": "module",
+  "scripts": {
+    "dev": "tauri dev",
+    "dev:web": "vite",
+    "typecheck": "tsc --noEmit",
+    "build:web": "vite build",
+    "build": "tauri build",
+    "build:win": "node scripts/build-win.mjs",
+    "build:linux": "node scripts/build-linux.mjs",
+    "test:rust": "cargo test --manifest-path src-tauri/Cargo.toml",
+    "tauri": "tauri"
+  },
+  "dependencies": {
+    "@tauri-apps/api": "^2.2.0",
+    "@tauri-apps/plugin-dialog": "^2.2.0",
+    "@tauri-apps/plugin-opener": "^2.2.0"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.2.7",
+    "typescript": "^5.7.3",
+    "vite": "^6.0.7"
+  }
+}

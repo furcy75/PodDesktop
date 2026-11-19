@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PodDesktop</title>
+  </head>
+  <body>
+    <div id="app" class="app-shell">
+      <!-- Barre supérieure (Recherche FTS5, Palette Ctrl+K, Synchro, Actualisation, Mini-Lecteur, Paramètres) -->
+      <header id="topbar" class="topbar"></header>
+
+      <!-- Corps principal 3 panneaux : Sidebar | Liste / Vue centrale | Inspecteur droit -->
+      <div class="workspace">
+        <aside id="sidebar" class="sidebar"></aside>
+        <main id="center-pane" class="center-pane"></main>
+        <aside id="inspector" class="inspector"></aside>
+      </div>
+
+      <!-- Barre de lecture persistante (se transforme en Mini-Lecteur 44px en mode flottant) -->
+      <footer id="player-bar" class="player-bar"></footer>
+    </div>
+
+    <!-- Couches flottantes : Menu contextuel clic droit, Palette Ctrl+K, Modales & Toasts -->
+    <div id="context-menu" class="context-menu hidden"></div>
+    <div id="command-palette" class="modal-backdrop hidden"></div>
+    <div id="modal-root" class="modal-backdrop hidden"></div>
+    <div id="toast-root" class="toast-root"></div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
