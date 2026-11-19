@@ -100,3 +100,22 @@ export const icons = {
   keyboard: (s = 16) =>
     svg('<rect x="2" y="4" width="20" height="16" rx="2"/><path d="M6 8h.001"/><path d="M10 8h.001"/><path d="M14 8h.001"/><path d="M18 8h.001"/><path d="M8 12h.001"/><path d="M12 12h.001"/><path d="M16 12h.001"/><path d="M7 16h10"/>', s),
 };
+
+/**
+ * Drapeaux SVG vectoriels nets (rendu couleur garanti sous Windows 10/11 et Linux,
+ * contrairement aux emojis drapeaux affichés en lettres sur Windows).
+ */
+export function flagIcon(code: string, width = 18, height = 13): string {
+  const common = `class="flag-svg" width="${width}" height="${height}" viewBox="0 0 24 16" aria-hidden="true"`;
+  switch (code) {
+    case "fr":
+      return `<svg ${common}><rect width="8" height="16" fill="#0055A4"/><rect x="8" width="8" height="16" fill="#FFFFFF"/><rect x="16" width="8" height="16" fill="#EF4135"/></svg>`;
+    case "es":
+      return `<svg ${common}><rect width="24" height="16" fill="#AA151B"/><rect y="4" width="24" height="8" fill="#F1BF00"/><rect x="5" y="6" width="3" height="4" rx="0.6" fill="#AA151B"/></svg>`;
+    case "de":
+      return `<svg ${common}><rect width="24" height="5.34" fill="#111111"/><rect y="5.33" width="24" height="5.34" fill="#DD0000"/><rect y="10.66" width="24" height="5.34" fill="#FFCE00"/></svg>`;
+    case "en":
+    default:
+      return `<svg ${common}><rect width="24" height="16" fill="#012169"/><path d="M0 0L24 16M24 0L0 16" stroke="#FFFFFF" stroke-width="3"/><path d="M0 0L24 16M24 0L0 16" stroke="#C8102E" stroke-width="1.4"/><path d="M12 0V16M0 8H24" stroke="#FFFFFF" stroke-width="5"/><path d="M12 0V16M0 8H24" stroke="#C8102E" stroke-width="2.8"/></svg>`;
+  }
+}

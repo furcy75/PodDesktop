@@ -12,7 +12,7 @@ import "./styles/components.css";
 
 import { listen } from "@tauri-apps/api/event";
 import { api } from "./api";
-import { onLanguageChange, setLanguage, t } from "./i18n";
+import { SUPPORTED_LANGUAGES, getActiveLang, onLanguageChange, setLanguage, t } from "./i18n";
 import { applyVisualPreferences, escapeHtml, showToast, store } from "./state";
 import type { AudioStateSnapshot, DownloadTaskInfo, SyncReport, ViewKind } from "./types";
 import { openCommandPalette } from "./ui/commandPalette";
@@ -33,10 +33,11 @@ import { renderSettingsView } from "./ui/settingsView";
 import { registerKeyboardShortcuts } from "./ui/shortcuts";
 import { renderSidebar } from "./ui/sidebar";
 import { renderStatsView } from "./ui/statsView";
-import { icons } from "./ui/icons";
+import { flagIcon, icons } from "./ui/icons";
 
 let searchDebounce: number | null = null;
 let lastAudioTrackKey = "";
+let langOutsideClickBound = false;
 
 async function bootstrap(): Promise<void> {
   // 1. Charge les réglages et applique immédiatement langue + thème/densité
@@ -147,6 +148,8 @@ function renderTopbar(): void {
   const bar = document.getElementById("topbar");
   if (!bar) return;
 
+  const activeLang = getActiveLang();
+
   bar.innerHTML = `
     <div class="brand">
       <div class="brand-badge">${icons.podcast(15)}</div>
@@ -172,6 +175,22 @@ function renderTopbar(): void {
         <span class="${store.isSyncing ? "spin" : ""}" style="display:inline-flex;color:var(--accent-cyan);">${icons.sync(16)}</span>
         <span>Sync</span>
       </button>
+      <div class="lang-switcher" id="lang-switcher">
+        <button class="topbar-btn" id="btn-lang-toggle" title="${escapeHtml(t("settings.language"))}">
+          ${flagIcon(activeLang, 18, 13)}
+          <span style="font-size:11.5px;font-weight:700;letter-spacing:0.03em;">${activeLang.toUpperCase()}</span>
+        </button>
+        <div class="lang-dropdown hidden" id="lang-dropdown">
+          ${SUPPORTED_LANGUAGES.map(
+            (l) => `
+            <button class="lang-option ${activeLang === l.code ? "active" : ""}" data-pick-lang="${l.code}">
+              ${flagIcon(l.code, 18, 13)}
+              <span>${escapeHtml(l.label)}</span>
+              ${activeLang === l.code ? '<span style="margin-left:auto;">✓</span>' : ""}
+            </button>`
+          ).join("")}
+        </div>
+      </div>
       <button class="topbar-btn topbar-btn-icon-only" id="btn-mini-top"
               title="${escapeHtml(t("app.miniPlayer"))}">
         ${icons.miniPlayer(17)}
@@ -183,6 +202,32 @@ function renderTopbar(): void {
       </button>
     </div>
   `;
+
+  // Menu déroulant rapide des langues par drapeau (FR / EN / DE / ES)
+  const langBtn = bar.querySelector("#btn-lang-toggle");
+  const langMenu = bar.querySelector("#lang-dropdown");
+  langBtn?.addEventListener("click", (e) => {
+    e.stopPropagation();
+    langMenu?.classList.toggle("hidden");
+  });
+  if (!langOutsideClickBound) {
+    langOutsideClickBound = true;
+    document.addEventListener("click", () => {
+      document.getElementById("lang-dropdown")?.classList.add("hidden");
+    });
+  }
+  bar.querySelectorAll<HTMLElement>("[data-pick-lang]").forEach((opt) => {
+    opt.addEventListener("click", async (e) => {
+      e.stopPropagation();
+      const code = opt.dataset.pickLang!;
+      langMenu?.classList.add("hidden");
+      setLanguage(code);
+      if (store.settings) {
+        store.settings.language = code;
+        await api.saveSettings(store.settings).catch(() => {});
+      }
+    });
+  });
 
   const searchInp = bar.querySelector("#global-search") as HTMLInputElement;
   searchInp?.addEventListener("input", () => {

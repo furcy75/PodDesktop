@@ -13,7 +13,7 @@ import { SUPPORTED_LANGUAGES, formatBytes, setLanguage, t } from "../i18n";
 import { applyVisualPreferences, escapeHtml, showToast, store } from "../state";
 import type { AppSettings } from "../types";
 import { confirmDialog } from "./dialogs";
-import { icons } from "./icons";
+import { flagIcon, icons } from "./icons";
 import { eventToShortcutCombo, setShortcutCaptureMode } from "./shortcuts";
 
 export interface SettingsCallbacks {
@@ -243,12 +243,17 @@ export async function renderSettingsView(cb: SettingsCallbacks): Promise<void> {
             <span class="setting-label-main" style="display:inline-flex;align-items:center;gap:7px;">
               ${icons.globe(15)} ${escapeHtml(t("settings.language"))}
             </span>
-            <select id="st-language">
-              <option value="auto" ${s.language === "auto" ? "selected" : ""}>${escapeHtml(t("settings.languageAuto"))}</option>
+            <div class="lang-pills" id="st-language-pills">
+              <button type="button" class="lang-pill-btn ${s.language === "auto" ? "active" : ""}" data-lang-choice="auto">
+                ${icons.globe(13)} ${escapeHtml(t("settings.languageAuto"))}
+              </button>
               ${SUPPORTED_LANGUAGES.map(
-                (l) => `<option value="${l.code}" ${s.language === l.code ? "selected" : ""}>${escapeHtml(l.label)}</option>`
+                (l) => `
+                <button type="button" class="lang-pill-btn ${s.language === l.code ? "active" : ""}" data-lang-choice="${l.code}">
+                  ${flagIcon(l.code, 18, 13)} ${escapeHtml(l.label)}
+                </button>`
               ).join("")}
-            </select>
+            </div>
           </div>
 
           <div class="setting-row">
@@ -511,13 +516,15 @@ export async function renderSettingsView(cb: SettingsCallbacks): Promise<void> {
     });
   });
 
-  // Changement de langue à chaud (UI + Backend System Tray / Taskbar)
-  center.querySelector("#st-language")?.addEventListener("change", async (e) => {
-    s.language = (e.target as HTMLSelectElement).value;
-    setLanguage(s.language);
-    await api.saveSettings(s);
-    cb.onSettingsApplied();
-    void renderSettingsView(cb);
+  // Changement de langue à chaud par drapeau (UI + Backend System Tray / Taskbar)
+  center.querySelectorAll<HTMLButtonElement>("[data-lang-choice]").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      s.language = btn.dataset.langChoice!;
+      setLanguage(s.language);
+      await api.saveSettings(s);
+      cb.onSettingsApplied();
+      void renderSettingsView(cb);
+    });
   });
 
   // Personnalisation interactive des raccourcis clavier
